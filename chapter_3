@@ -1,4 +1,5 @@
 from math import log
+import operator
 
 def cal_shannon_ent(dataset):
     num_entries=len(dataset)
@@ -70,3 +71,32 @@ loan_data = [['高', '有工作', '良好', 'yes'], ['高', '无工作', '一般
              ['低', '无工作', '一般', 'no'], ['高', '有工作', '差', 'yes'],
              ['中', '无工作', '良好', 'yes'], ['低', '有工作', '良好', 'yes']]
 print(choose_best_feature_split(loan_data))
+
+def majorityCnt(classList):
+    classCount={}
+    for vote in classList:
+        if vote not in classCount.keys():classCount[vote]=0
+        classCount[vote]+=1
+        sorted_classCount=sorted(classCount.items(),key=operator.itemgetter(1),reverse=True)
+    return sorted_classCount[0][0]
+
+
+def createTree(dataset,labels):
+    classList=[example[-1] for example in dataset]
+    if classList.count(classList[0])==len(classList):
+        return classList[0]
+    if len(dataset[0])==1:
+        return majorityCnt(classList)
+    best_feature=choose_best_feature_split(dataset)
+    best_feature_lable=labels[best_feature]
+    myTree={best_feature_lable:{}}
+    del(labels[best_feature])
+    feature_values=[example[best_feature] for example in dataset]
+    unique_val=set(feature_values)
+    for value in unique_val:
+        sub_labels=labels[:]
+        myTree[best_feature_lable][value]=createTree(split_dataset(dataset,best_feature,value),sub_labels)
+    return myTree
+
+myDat,labels=create_dataSet()
+myTree=createTree(myDat,labels)
